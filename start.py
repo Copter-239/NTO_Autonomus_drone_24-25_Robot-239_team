@@ -43,13 +43,13 @@ land = rospy.ServiceProxy('land', Trigger)
 
 
 print('Take off and hover 1 m above the ground')
-navigate(x=0, y=0, z=1.5, frame_id='body', auto_arm=True)
+navigate(x=0, y=0, z=1.7, frame_id='body', auto_arm=True)
 
 # Wait for 5 seconds
 rospy.sleep(5)
 
-y = -0.9
-q = 0.9
+y = -0.94
+q = 0.94
 navigate(x=q, y=0, z=0, frame_id='body')
 rospy.sleep(5)
 rospy.Subscriber('main_camera/image_raw', Image, image_callback, queue_size=1)
