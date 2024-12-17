@@ -10,11 +10,11 @@ class ServerHandler(BaseHTTPRequestHandler):
             self.wfile.write(open('site.html', 'r').read().encode('utf-8'))
         elif self.path.endswith("/get/start") or self.path.endswith("/get/stop") or self.path.endswith("/get/kill") or self.path.endswith("/get/update"):
             if self.path.endswith("/get/start"):
-                print(1)
+                open('data.data', 'w').write('s')
             if self.path.endswith("/get/stop"):
-                print(2)
+                open('data.data', 'w').write('f')
             if self.path.endswith("/get/kill"):
-                print(3)
+                open('data.data', 'w').write('k')
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
