@@ -7,3 +7,6 @@ https://drive.google.com/file/d/1NgDEkE0HLVZqoJv8DdhWLCj2qPvdnbYA/view
 4. Запустить симулятор Gazebo
 5. Для запуска квадрокптера запустить start.py 
 (Вроде-бы всё готово, но не тестировалось)
+6. Для открытия web-интерфейса в виртуальной машине перейдите по ссылке -> http://localhost:8000/
+
+
