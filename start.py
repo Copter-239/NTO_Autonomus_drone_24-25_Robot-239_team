@@ -1,7 +1,16 @@
 
+import threading, subprocess
+
+def print_numbers():
+    subprocess.run(["python3", "server.py"], capture_output=True)
+
+thread1 = threading.Thread(target=print_numbers)
+
+
+thread1.start()
+
+
 from pprint import pprint
-from os import startfile
-from time import time, sleep
 import rospy
 from clover import srv
 from std_srvs.srv import Trigger
@@ -9,10 +18,15 @@ import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from clover import long_callback
+from mavros_msgs.srv import CommandBool
+arming = rospy.ServiceProxy('mavros/cmd/arming', CommandBool)
 
 
-cord = [1,1]
-startfile('server.py')
+
+
+
+
+cord = [0,0]
 bridge = CvBridge()
 map = [['', '', '', '', '', '', '', '', '', ''],
        ['', '', '', '', '', '', '', '', '', ''],
@@ -100,12 +114,20 @@ def update_site(map):
     """
     open('site.html', 'w').write(html)
 update_site(map)
+from time import time, sleep 
 open('data.data', 'w').write('')
+start = False
+while not start:
+    i = open('data.data').read()
+    print('\r',end=f"q {i}")
+    if i == 's':start = True
+    else:
+        sleep(0.5)
 @long_callback
 def image_callback(msg):
     global cord
     global map
-    if map[cord[0]-1][cord[1]-1]=='':
+    if map[cord[0]][cord[1]]=='':
         #imgg = bridge.imgmsg_to_cv2(msg, 'bgr8')
         # convert to HSV to work with color hue
         #img2 = cv2.cvtColor(imgg, cv2.COLOR_BGR2HSV)
@@ -128,7 +150,7 @@ def image_callback(msg):
         for a in j: y = y + sum(a)//255
         print('\r', end=f'{r},{g},{b},{y}               ')
         c = {r:'R',g:'G',b:'B',y:'Y', 1000:"N"}
-        map[cord[0]-1][cord[1]-1] = c[max(c.keys())]
+        map[cord[0]][cord[1]] = c[max(c.keys())]
         update_site(map)
 
 rospy.init_node('flight')
@@ -141,37 +163,36 @@ set_rates = rospy.ServiceProxy('set_rates', srv.SetRates)
 land = rospy.ServiceProxy('land', Trigger)
 def navigate_plys(x,y,z,frame_id):
     global cord
-    navigate(x=x, y=y, z=z, frame_id=frame_id)
+    navigate(x=x-1, y=y-1, z=z, frame_id=frame_id)
     a = time()
-    while not a + 5 <= time():
+    for _u in range(5):
+        rospy.sleep(1)
         f = open('data.data').read()
         if f != '' or 's' != f:
             open('data.data', 'w').write('')
             if f == 'f':
+                print('f')
                 land()
                 rospy.sleep(5)
                 exit()
             if f == 'k':
-                rospy.on_shutdown()
-                rospy.sleep(5)
+                print('k')
+                arming(False)
                 exit()
-    cord = [x, y]
+    cord = [x-1, y-1]
 
 
 height = 1.7
 
 
-start = False
-while not start:
-    if open('data.data').read() == 's':start = True
-    else:sleep(0.5)
+
 
 
 # process every frame:
 image_sub = rospy.Subscriber('main_camera/image_raw', Image, image_callback, queue_size=1)
 
 print('Take off and hover 1 m above the ground')
-navigate(x=1, y=1, z=height, frame_id='aruco_map', auto_arm=True)
+navigate(x=1-1, y=1-1, z=height, frame_id='body', auto_arm=True)
 rospy.sleep(5)
 
 
@@ -183,6 +204,10 @@ navigate_plys(x=6, y=1, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=1, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=1, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=1, z=height, frame_id='aruco_map')
+navigate_plys(x=10, y=1, z=height, frame_id='aruco_map')
+
+
+navigate_plys(x=10, y=2, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=2, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=2, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=2, z=height, frame_id='aruco_map')
@@ -199,6 +224,10 @@ navigate_plys(x=6, y=3, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=3, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=3, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=3, z=height, frame_id='aruco_map')
+navigate_plys(x=10, y=3, z=height, frame_id='aruco_map')
+
+
+navigate_plys(x=10, y=4, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=4, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=4, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=4, z=height, frame_id='aruco_map')
@@ -215,6 +244,10 @@ navigate_plys(x=6, y=5, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=5, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=5, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=5, z=height, frame_id='aruco_map')
+navigate_plys(x=10, y=5, z=height, frame_id='aruco_map')
+
+
+navigate_plys(x=10, y=6, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=6, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=6, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=6, z=height, frame_id='aruco_map')
@@ -231,6 +264,10 @@ navigate_plys(x=6, y=7, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=7, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=7, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=7, z=height, frame_id='aruco_map')
+navigate_plys(x=10, y=7, z=height, frame_id='aruco_map')
+
+
+navigate_plys(x=10, y=8, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=8, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=8, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=8, z=height, frame_id='aruco_map')
@@ -247,6 +284,9 @@ navigate_plys(x=6, y=9, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=9, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=9, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=9, z=height, frame_id='aruco_map')
+navigate_plys(x=10, y=9, z=height, frame_id='aruco_map')
+
+navigate_plys(x=10, y=10, z=height, frame_id='aruco_map')
 navigate_plys(x=9, y=10, z=height, frame_id='aruco_map')
 navigate_plys(x=8, y=10, z=height, frame_id='aruco_map')
 navigate_plys(x=7, y=10, z=height, frame_id='aruco_map')
@@ -265,7 +305,6 @@ navigate_plys(x=1, y=4, z=height, frame_id='aruco_map')
 navigate_plys(x=1, y=3, z=height, frame_id='aruco_map')
 navigate_plys(x=1, y=2, z=height, frame_id='aruco_map')
 navigate_plys(x=1, y=1, z=height, frame_id='aruco_map')
-pprint.pprint(map)
 
 
 
